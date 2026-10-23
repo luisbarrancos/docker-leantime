@@ -62,7 +62,7 @@ services:
       - CAP_SETUID
 
     ports:
-      - "127.0.0.1:${LEAN_PORT:-8080}:8080"
+      - "127.0.0.1:${LEAN_PORT:-18081}:8081"
 
     networks:
       - leantime-net
@@ -95,6 +95,38 @@ services:
     depends_on:
       leantime_db:
         condition: service_healthy
+
+  # 
+  # Leantime MCP server
+  # 
+  leantime_mcp:
+    image: local/leantime-mcp:0.2.0
+    restart: unless-stopped
+
+    env_file:
+      - ./mcp.env
+
+    networks:
+      - leantime-net
+
+    ports:
+      - "127.0.0.1:13000:3000"
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+
+    depends_on:
+      leantime:
+        condition: service_started
+
 
 # 
 # Internal Docker network
